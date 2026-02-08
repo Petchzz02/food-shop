@@ -40,20 +40,17 @@ export async function deleteProduct(formData: FormData) {
 // app/actions.ts (เพิ่มต่อท้าย)
 
 export async function updateProduct(formData: FormData) {
-  // 1. รับค่าจากฟอร์ม
-  const id = formData.get('id') as string
-  const name = formData.get('name') as string
-  const price = formData.get('price') as string
+  const id = formData.get('id') as string;
+  const name = formData.get('name') as string;
+  const price = formData.get('price');
 
-  // 2. อัปเดตข้อมูลลง Database
   await prisma.product.update({
-    where: { id: Number(id) }, // ถ้า ID คุณเป็น Int ให้แก้เป็น Number(id)
+    where: { id: Number(id) },
     data: {
       name: name,
-      price: Number(price),
+      price: Number(price) || 0, // ป้องกันกรณีค่า price เป็นค่าว่างหรือ NaN
     },
-  })
+  });
 
-  // 3. กลับไปหน้าแรก
-  redirect('/')
+  redirect('/');
 }
