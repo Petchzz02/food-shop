@@ -2,7 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { addProduct, deleteProduct } from './actions'
 import Link from 'next/link'
-import { SubmitButton } from '@/components/SubmitBotton'
+import { SubmitButton } from '@/components/SubmitButton'
 
 export default async function Home() {
   const products = await prisma.product.findMany({

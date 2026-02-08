@@ -2,7 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { updateProduct } from '@/app/actions'
 import { redirect } from 'next/navigation'
-import { SubmitButton } from '@/components/SubmitBotton'
+import { SubmitButton } from '@/components/SubmitButton'
 
 export default async function EditPage({ params }: { params: Promise<{ id: string }> }) {
   // 1. ดึง ID จาก URL
