@@ -43,11 +43,11 @@ export async function updateProduct(formData: FormData) {
   // 1. รับค่าจากฟอร์ม
   const id = formData.get('id') as string
   const name = formData.get('name') as string
-  const price = formData.get('price')
+  const price = formData.get('price') as string
 
   // 2. อัปเดตข้อมูลลง Database
   await prisma.product.update({
-    where: { id: String(id) }, // ถ้า ID คุณเป็น Int ให้แก้เป็น Number(id)
+    where: { id: Number(id) }, // ถ้า ID คุณเป็น Int ให้แก้เป็น Number(id)
     data: {
       name: name,
       price: Number(price),

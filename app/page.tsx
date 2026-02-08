@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { addProduct, deleteProduct } from './actions'
 import Link from 'next/link'
+import { SubmitButton } from '@/components/SubmitBotton'
 
 export default async function Home() {
   const products = await prisma.product.findMany({
@@ -39,12 +40,7 @@ export default async function Home() {
               className="w-full sm:w-32 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             
-            <button 
-              type="submit" 
-              className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-sm"
-            >
-              เพิ่ม
-            </button>
+            <SubmitButton label="เพิ่มเมนู" />
           </form>
         </div>
 
