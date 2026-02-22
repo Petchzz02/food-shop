@@ -1,74 +1,129 @@
 // app/edit/[id]/page.tsx
-import { prisma } from '@/lib/prisma'
+import pool from '@/lib/db'
 import { updateProduct } from '@/app/actions'
 import { redirect } from 'next/navigation'
 import { SubmitButton } from '@/components/SubmitButton'
 
 export default async function EditPage({ params }: { params: Promise<{ id: string }> }) {
-  // 1. ดึง ID จาก URL
-  const {id} = await params
-
-  // 2. ดึงข้อมูลสินค้าชิ้นนั้นจาก Database มาโชว์ก่อน
-  const product = await prisma.product.findUnique({
-    where: { id: Number(id) }, 
-  })
-
-  // ถ้าหาไม่เจอ ให้ดีดกลับหน้าแรก
-  if (!product) {
-    redirect('/')
-  }
+  const { id } = await params
+  const [rows] = await pool.execute('SELECT * FROM Product WHERE id = ?', [Number(id)]) as any[]
+  const product = (rows as any[])[0]
+  if (!product) redirect('/')
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center py-10 px-4">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-orange-100">
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fff7ed 0%, #ffffff 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+      <div style={{ width: '100%', maxWidth: '440px' }}>
 
-          {/* หัวข้อ */}
-        <div className="text-center mb-6">
-          <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justity center mx-auto mb-4 text-3xl">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800 text-center">✏️ แก้ไขข้อมูล</h1></div>
-        </div>
+        <div style={{ background: '#ffffff', borderRadius: '28px', boxShadow: '0 12px 40px rgba(0,0,0,0.12)', overflow: 'hidden', border: '1.5px solid #fed7aa' }}>
 
-        <form action={updateProduct} className="flex flex-col gap-4">
-          {/* ส่ง ID ไปแบบลับๆ เพื่อให้รู้ว่าจะแก้ตัวไหน */}
-          <input type="hidden" name="id" value={product.id} />
-        
-          {/* ช่องกรอกชื่อ */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อเมนู</label>
-            <input
-              type="text"
-              name="name"
-              defaultValue={product.name} // ใส่ค่าเดิมลงไป
-
-              placeholder='เช่น ปลาแซลมอน'
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
-            />
+          {/* Header */}
+          <div style={{ background: 'linear-gradient(135deg, #ea580c, #f97316)', padding: '32px 32px 28px' }}>
+            <div style={{ fontSize: '40px', marginBottom: '8px' }}>✏️</div>
+            <h1 style={{ color: '#ffffff', fontWeight: 900, fontSize: '24px', margin: 0 }}>แก้ไขเมนู</h1>
+            <p style={{ color: '#fed7aa', fontSize: '13px', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {product.name}
+            </p>
           </div>
-          {/* ช่องกรอกราคา */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ราคา</label>
-            <input
-              type="number"
-              name="price"
-              defaultValue={product.price} // ใส่ราคาเดิมลงไป
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
-            />
-          </div>
-            {/*ปุ่มกด (Action Button) */}
-          <div className="flex gap-2 mt-4">
-            <a 
-              href="/" 
-              className="flex-1 text-center py-2.5 px-4 rounded-lg border border-gray-300 text-gray-300 text-gray-600 font-medium hover:bg-gray-100 teransition-colors"
-            >
-              ยกเลิก
-            </a>
 
-            {/* ปุ่ม SubmitButton ที่มี Loading State */}
-            <div className="flex-1">
-              <SubmitButton label="บันทึกแก้ไข" />
+          {/* Form */}
+          <form action={updateProduct} style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <input type="hidden" name="id" value={product.id} />
+
+            <div>
+              <label style={{ display: 'block', fontWeight: 700, fontSize: '13px', color: '#374151', marginBottom: '8px' }}>
+                ชื่อเมนู
+              </label>
+              <input
+                type="text" name="name"
+                defaultValue={product.name}
+                placeholder="เช่น ปลาแซลมอน"
+                style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: '12px', padding: '12px 16px', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }}
+              />
             </div>
+
+            <div>
+              <label style={{ display: 'block', fontWeight: 700, fontSize: '13px', color: '#374151', marginBottom: '8px' }}>
+                ราคา (บาท)
+              </label>
+              <input
+                type="number" name="price"
+                defaultValue={product.price}
+                style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: '12px', padding: '12px 16px', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
+              <a href="/" style={{
+                flex: 1, textAlign: 'center', padding: '13px',
+                border: '1.5px solid #e5e7eb', borderRadius: '12px',
+                color: '#6b7280', fontWeight: 700, fontSize: '14px',
+                textDecoration: 'none', background: '#f9fafb',
+              }}>
+                ← ยกเลิก
+              </a>
+              <div style={{ flex: 1 }}>
+                <SubmitButton label="💾 บันทึก" className="w-full" />
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-orange-50 to-white flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+
+        {/* Card */}
+        <div className="bg-white rounded-3xl shadow-xl border border-orange-100 overflow-hidden">
+
+          {/* Header */}
+          <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-8 py-6 text-white">
+            <p className="text-4xl mb-2">✏️</p>
+            <h1 className="text-2xl font-black">แก้ไขเมนู</h1>
+            <p className="text-orange-100 text-sm mt-1 truncate">กำลังแก้ไข: {product.name}</p>
           </div>
-        </form>
+
+          {/* Form */}
+          <form action={updateProduct} className="p-8 flex flex-col gap-5">
+            <input type="hidden" name="id" value={product.id} />
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">ชื่อเมนู</label>
+              <input
+                type="text"
+                name="name"
+                defaultValue={product.name}
+                placeholder="เช่น ปลาแซลมอน"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-400 outline-none transition-all text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">ราคา (บาท)</label>
+              <input
+                type="number"
+                name="price"
+                defaultValue={product.price}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-400 outline-none transition-all text-sm"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <a
+                href="/"
+                className="flex-1 text-center py-3 px-4 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-colors text-sm"
+              >
+                ← ยกเลิก
+              </a>
+              <div className="flex-1">
+                <SubmitButton label="💾 บันทึก" className="w-full" />
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </main>
   )

@@ -2,17 +2,27 @@
 
 import { useFormStatus } from "react-dom"
 
-export function SubmitButton({ label, className = "" }: { label: string, className?: string }) {
-  const { pending } = useFormStatus();
+export function SubmitButton({ label, className = "" }: { label: string; className?: string }) {
+  const { pending } = useFormStatus()
   return (
     <button
       type="submit"
       disabled={pending}
-      className={`font-medium py-2 px-6 rounded-lg transition-colors shadow-sm text-white ${
-        pending ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-50 hover:bg-orange-600'
-      } ${className}`} // อนุญาตให้ส่ง class เพิ่มเติมเข้ามาได้
+      className={className}
+      style={{
+        background: pending ? '#d1d5db' : 'linear-gradient(135deg, #ea580c, #f97316)',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '12px',
+        padding: '12px 24px',
+        fontWeight: 700,
+        fontSize: '14px',
+        cursor: pending ? 'not-allowed' : 'pointer',
+        boxShadow: pending ? 'none' : '0 4px 12px rgba(234,88,12,0.3)',
+        whiteSpace: 'nowrap',
+      }}
     >
-      {pending ? "กำลังบันทึก..." : label}
+      {pending ? '⏳ กำลังบันทึก...' : label}
     </button>
-  );
+  )
 }

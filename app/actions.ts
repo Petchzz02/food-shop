@@ -1,85 +1,76 @@
 // app/actions.ts
-'use server' // บรรทัดนี้สำคัญมาก! บอก Next.js ว่านี่คือโค้ดฝั่ง Server
+'use server'
 
-import { prisma } from '@/lib/prisma'
+import pool from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getSession } from '@/lib/auth'
 
 export async function addProduct(formData: FormData) {
-  // 1. ดึงค่าจากฟอร์ม
   const name = formData.get('name') as string
   const price = Number(formData.get('price'))
 
-  // 2. บันทึกลง Database
-  // (เช็คชื่อ model ดีๆ นะครับ ถ้าของคุณเป็น food หรือ user ให้แก้ตรง prisma.product)
-  await prisma.product.create({
-    data: {
-      name: name,
-      price: price,
-    },
-  })
+  await pool.execute('INSERT INTO Product (name, price) VALUES (?, ?)', [name, price])
 
-  // 3. สั่งให้หน้าเว็บรีเฟรชข้อมูลทันที (ไม่ต้องกด F5 เอง)
   revalidatePath('/')
 }
 
 export async function deleteProduct(formData: FormData) {
-  // 1. ดึง ID ที่ส่งมาจากปุ่มลบ
-  const id = formData.get('id')
-  const idToDelete = Number(id) // แปลงเป็น number เพราะ id ใน schema เป็น Int
+  const id = Number(formData.get('id'))
 
-  // 2. สั่งลบข้อมูลออกจาก Database
-  await prisma.product.delete({
-    where: { id: idToDelete },
-  })
+  await pool.execute('DELETE FROM Product WHERE id = ?', [id])
 
-  // 3. รีเฟรชหน้าจอ
   revalidatePath('/')
 }
-// app/actions.ts (เพิ่มต่อท้าย)
 
 export async function updateProduct(formData: FormData) {
-  const id = formData.get('id') as string;
-  const name = formData.get('name') as string;
-  const price = formData.get('price');
+  const id = Number(formData.get('id'))
+  const name = formData.get('name') as string
+  const price = Number(formData.get('price')) || 0
 
-  await prisma.product.update({
-    where: { id: Number(id) },
-    data: {
-      name: name,
-      price: Number(price) || 0, // ป้องกันกรณีค่า price เป็นค่าว่างหรือ NaN
-    },
-  });
+  await pool.execute('UPDATE Product SET name = ?, price = ? WHERE id = ?', [name, price, id])
 
-  redirect('/');
+  redirect('/')
 }
+
 export async function submitOrder(cartItems: { id: number; count: number }[]) {
-  // 1.คำนวณราคารวมใหม่ฝั่ง Server (เพื่อความปลอดภัย)
   let total = 0
-  // เตรียมข้อมูลสำหรับบันทึก OrderItem
-  const orderItemsData = []
-    for (const item of cartItems){
-      const product = await prisma.product.findUnique({ where: { id:item.id}})
-      if (product) {
-        total += product.price * item.count
-        orderItemsData.push({
-          productId: product.id,
-          quantity: item.count,
-          price: product.price
-        })
-      }
+  const orderItemsData: { productId: number; quantity: number; price: number }[] = []
+
+  for (const item of cartItems) {
+    const [rows] = await pool.execute('SELECT * FROM Product WHERE id = ?', [item.id]) as any[]
+    const product = (rows as any[])[0]
+    if (product) {
+      total += product.price * item.count
+      orderItemsData.push({ productId: product.id, quantity: item.count, price: product.price })
     }
-  // 2.สร้าง Order ลง Database
-  await prisma.order.create({
-    data: {
-      total: total,
-      status: 'PENDING',
-      items:{
-        create: orderItemsData
-      }
+  }
+
+  // เช็ค session เพื่อเชื่อม order กับ user
+  const session = await getSession()
+  const userId = session?.id ?? null
+
+  const [result] = await pool.execute(
+    'INSERT INTO `Order` (total, status, userId) VALUES (?, ?, ?)',
+    [total, 'PENDING', userId]
+  ) as any[]
+  const orderId = (result as any).insertId
+
+  for (const orderItem of orderItemsData) {
+    await pool.execute(
+      'INSERT INTO OrderItem (orderId, productId, quantity, price) VALUES (?, ?, ?, ?)',
+      [orderId, orderItem.productId, orderItem.quantity, orderItem.price]
+    )
+  }
+
+  // ให้คะแนน: 1 แต้มต่อทุก 10 บาท
+  if (userId) {
+    const earnedPoints = Math.floor(total / 10)
+    if (earnedPoints > 0) {
+      await pool.execute('UPDATE User SET points = points + ? WHERE id = ?', [earnedPoints, userId])
     }
-  })
-  // 3. รีเฟรชหน้าจอหรือพาไปหน้าของคุณ (กรณีนี้รีเฟรชก่อน)
+  }
+
   revalidatePath('/')
-  return { success: true  }
+  return { success: true, earnedPoints: userId ? Math.floor(total / 10) : 0 }
 }
