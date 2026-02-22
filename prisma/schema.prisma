@@ -8,14 +8,18 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  role      String   @default("USER")
-  points    Int      @default(0)
-  createdAt DateTime @default(now())
-  orders    Order[]
+  id           Int                  @id @default(autoincrement())
+  email        String               @unique
+  password     String
+  name         String?
+  phone        String?
+  role         String               @default("USER")
+  points       Int                  @default(0)
+  createdAt    DateTime             @default(now())
+  orders       Order[]
+  addresses    Address[]
+  favorites    Favorite[]
+  notification NotificationSetting?
 }
 
 model Product {
@@ -25,6 +29,7 @@ model Product {
   stock      Int         @default(0)
   image      String?
   orderItems OrderItem[]
+  favorites  Favorite[]
 }
 
 model Order {
@@ -45,4 +50,34 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
   price     Int
+}
+
+model Address {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipientName String
+  phone         String
+  address       String
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model NotificationSetting {
+  id         Int     @id @default(autoincrement())
+  userId     Int     @unique
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promoNotif Boolean @default(true)
+  orderNotif Boolean @default(true)
 }

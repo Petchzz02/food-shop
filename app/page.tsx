@@ -31,7 +31,7 @@ export default async function Home() {
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
 
         {/* Admin Panel */}
-        <details style={{ marginBottom: '36px' }}>
+        {user?.role === 'admin' && <details style={{ marginBottom: '36px' }}>
           <summary style={{
             cursor: 'pointer',
             display: 'inline-flex',
@@ -90,10 +90,10 @@ export default async function Home() {
               <SubmitButton label="➕ เพิ่มเมนู" />
             </form>
           </div>
-        </details>
+        </details>}
 
         {/* FoodList */}
-        <FoodList products={products} userId={user?.id ?? null} />
+        <FoodList products={products} userId={user?.id ?? null} isAdmin={user?.role === 'admin'} />
       </div>
 
       {/* Footer */}

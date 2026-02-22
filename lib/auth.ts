@@ -7,7 +7,7 @@ export async function getSession() {
   if (!userId) return null
 
   const [rows] = await pool.execute(
-    'SELECT id, name, email, role, points FROM User WHERE id = ?',
+    'SELECT id, name, email, role, points, phone FROM User WHERE id = ?',
     [Number(userId)]
   ) as any[]
 

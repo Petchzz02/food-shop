@@ -12,7 +12,7 @@ interface Product {
 
 type CartItem = { id: number; name: string; price: number; count: number }
 
-export function FoodList({ products, userId }: { products: Product[]; userId?: number | null }) {
+export function FoodList({ products, userId, isAdmin }: { products: Product[]; userId?: number | null; isAdmin?: boolean }) {
   const [cart, setCart] = useState<CartItem[]>([])
   const [ordered, setOrdered] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -115,7 +115,7 @@ export function FoodList({ products, userId }: { products: Product[]; userId?: n
                   </div>
 
                   {/* Admin edit/delete */}
-                  <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                  {isAdmin && <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
                     <a href={`/edit/${item.id}`} style={{
                       background: '#f3f4f6', color: '#6b7280',
                       border: 'none', borderRadius: '8px',
@@ -131,7 +131,7 @@ export function FoodList({ products, userId }: { products: Product[]; userId?: n
                         padding: '6px 10px', fontSize: '13px',
                         cursor: 'pointer', fontWeight: 600,
                       }}>🗑️</button>
-                  </div>
+                  </div>}
 
                   {/* Add/Remove buttons */}
                   {inCart ? (

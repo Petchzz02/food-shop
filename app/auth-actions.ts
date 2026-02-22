@@ -54,3 +54,27 @@ export async function logout() {
   cookieStore.delete('session')
   redirect('/')
 }
+
+export async function adminLogin(formData: FormData) {
+  const username = formData.get('username') as string
+  const password = formData.get('password') as string
+
+  if (username !== 'admin01' || password !== 'admin') {
+    return { error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' }
+  }
+
+  const cookieStore = await cookies()
+  cookieStore.set('admin_session', 'authenticated', {
+    httpOnly: true,
+    path: '/',
+    maxAge: 60 * 60 * 8, // 8 ชั่วโมง
+  })
+
+  redirect('/admin')
+}
+
+export async function adminLogout() {
+  const cookieStore = await cookies()
+  cookieStore.delete('admin_session')
+  redirect('/')
+}

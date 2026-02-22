@@ -1,7 +1,16 @@
-import { logout } from '@/app/auth-actions'
+import { adminLogout } from '@/app/auth-actions'
 import Link from 'next/link'
+import { headers } from 'next/headers'
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') ?? ''
+
+  // หน้า login ไม่ต้องการ nav
+  if (pathname === '/admin/login') {
+    return <>{children}</>
+  }
+
   return (
     <>
       <nav style={{
@@ -37,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }}>
             ← กลับหน้าร้าน
           </Link>
-          <form action={logout}>
+          <form action={adminLogout}>
             <button type="submit" style={{
               background: '#374151', color: '#d1d5db',
               border: 'none', borderRadius: '8px',
