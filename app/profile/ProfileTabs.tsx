@@ -8,18 +8,20 @@ import {
 } from '@/app/profile-actions'
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  PENDING:    { label: 'รอยืนยัน',      color: '#d97706', bg: '#fef3c7' },
-  PROCESSING: { label: 'กำลังจัดส่ง',   color: '#2563eb', bg: '#dbeafe' },
-  COMPLETED:  { label: 'สำเร็จ',         color: '#16a34a', bg: '#dcfce7' },
-  CANCELLED:  { label: 'ยกเลิก',         color: '#dc2626', bg: '#fee2e2' },
+  PENDING: { label: '⏳ รอยืนยัน', color: '#d97706', bg: '#fef3c7' },
+  PAID: { label: '💳 ชำระแล้ว', color: '#7c3aed', bg: '#f5f3ff' },
+  SHIPPED: { label: '🚚 จัดส่งแล้ว', color: '#15803d', bg: '#dcfce7' },
+  PROCESSING: { label: '⚙️ กำลังดำเนินการ', color: '#2563eb', bg: '#dbeafe' },
+  COMPLETED: { label: '✅ สำเร็จ', color: '#16a34a', bg: '#dcfce7' },
+  CANCELLED: { label: '❌ ยกเลิก', color: '#dc2626', bg: '#fee2e2' },
 }
 
 const TABS = [
-  { id: 'info',    label: '👤 ข้อมูลส่วนตัว' },
+  { id: 'info', label: '👤 ข้อมูลส่วนตัว' },
   { id: 'address', label: '📍 ที่อยู่จัดส่ง' },
-  { id: 'orders',  label: '🛒 ประวัติสั่งซื้อ' },
-  { id: 'fav',     label: '⭐ รายการโปรด' },
-  { id: 'notif',   label: '🔔 การแจ้งเตือน' },
+  { id: 'orders', label: '🛒 ประวัติสั่งซื้อ' },
+  { id: 'fav', label: '⭐ รายการโปรด' },
+  { id: 'notif', label: '🔔 การแจ้งเตือน' },
   { id: 'payment', label: '💳 ชำระเงิน' },
 ]
 
@@ -535,11 +537,11 @@ export default function ProfileTabs({ user, addresses, orders, favorites, notifS
       </div>
 
       {/* Content */}
-      {activeTab === 'info'    && <TabInfo user={user} />}
+      {activeTab === 'info' && <TabInfo user={user} />}
       {activeTab === 'address' && <TabAddress addresses={addresses} />}
-      {activeTab === 'orders'  && <TabOrders orders={orders} />}
-      {activeTab === 'fav'     && <TabFavorites favorites={favorites} />}
-      {activeTab === 'notif'   && <TabNotification notifSetting={notifSetting} />}
+      {activeTab === 'orders' && <TabOrders orders={orders} />}
+      {activeTab === 'fav' && <TabFavorites favorites={favorites} />}
+      {activeTab === 'notif' && <TabNotification notifSetting={notifSetting} />}
       {activeTab === 'payment' && <TabPayment />}
     </div>
   )

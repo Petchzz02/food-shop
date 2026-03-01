@@ -12,14 +12,9 @@ export default async function Navbar() {
   const user = await getSession()
 
   return (
-    <nav style={{
+    <nav className="nav-container" style={{
       background: '#ffffff',
       boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-      padding: '0 32px',
-      height: '64px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
       position: 'sticky',
       top: 0,
       zIndex: 100,
@@ -31,7 +26,17 @@ export default async function Navbar() {
       </Link>
 
       {/* Right */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="nav-right">
+        {/* Promotion link for everyone */}
+        <Link href="/promotions" style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          color: '#ea580c', fontWeight: 800, fontSize: '14px',
+          textDecoration: 'none', padding: '6px 14px',
+          background: '#fff7ed', borderRadius: '10px',
+        }}>
+          📣 โปรโมชั่น
+        </Link>
+
         {user ? (
           <>
             {/* Points badge */}
@@ -43,6 +48,18 @@ export default async function Navbar() {
             }}>
               <span style={{ fontSize: '14px' }}>⭐</span>
               <span style={{ color: '#ea580c', fontWeight: 800, fontSize: '13px' }}>{user.points.toLocaleString()} แต้ม</span>
+            </Link>
+
+            {/* Checkout link */}
+            <Link href="/checkout" style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              background: 'linear-gradient(135deg, #16a34a, #22c55e)',
+              borderRadius: '10px', padding: '6px 14px',
+              textDecoration: 'none',
+              boxShadow: '0 2px 8px rgba(22,163,74,0.2)',
+            }}>
+              <span style={{ fontSize: '14px' }}>💳</span>
+              <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '13px' }}>ชำระเงิน</span>
             </Link>
 
             {/* User name */}

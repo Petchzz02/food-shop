@@ -8,6 +8,23 @@ export default async function Home() {
   const [products] = await pool.execute('SELECT * FROM Product ORDER BY id DESC') as any[]
   const user = await getSession()
 
+  // ดึงแต้มของ user (ถ้า login)
+  let userPoints = 0
+  if (user?.id) {
+    const [pointsRows] = await pool.execute('SELECT points FROM User WHERE id = ?', [user.id]) as any[]
+    userPoints = (pointsRows as any[])[0]?.points ?? 0
+  }
+
+  // ดึงค่าเฉลี่ยรีวิวต่อสินค้า
+  const [reviewRows] = await pool.execute(
+    `SELECT productId, ROUND(AVG(rating), 1) AS avgRating, COUNT(*) AS reviewCount
+     FROM Review GROUP BY productId`
+  ).catch(() => [[]] as any[])
+  const reviewMap: Record<number, { avgRating: number; reviewCount: number }> = {}
+  for (const r of reviewRows as any[]) {
+    reviewMap[r.productId] = { avgRating: r.avgRating, reviewCount: r.reviewCount }
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fff7ed 0%, #ffffff 100%)' }}>
 
@@ -87,13 +104,25 @@ export default async function Home() {
                   padding: '12px 16px', fontSize: '14px', outline: 'none',
                 }}
               />
+              <input
+                type="number" name="stock"
+                placeholder="สต็อก (ชิ้น)"
+                min="0"
+                defaultValue="0"
+                required
+                style={{
+                  width: '120px',
+                  border: '1.5px solid #e5e7eb', borderRadius: '10px',
+                  padding: '12px 16px', fontSize: '14px', outline: 'none',
+                }}
+              />
               <SubmitButton label="➕ เพิ่มเมนู" />
             </form>
           </div>
         </details>}
 
         {/* FoodList */}
-        <FoodList products={products} userId={user?.id ?? null} isAdmin={user?.role === 'admin'} />
+        <FoodList products={products} userId={user?.id ?? null} isAdmin={user?.role === 'admin'} userPoints={userPoints} reviewMap={reviewMap} />
       </div>
 
       {/* Footer */}

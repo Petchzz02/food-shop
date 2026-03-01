@@ -10,5 +10,68 @@ body {
   background: #fff7ed;
   color: #1a1a1a;
   font-family: 'Segoe UI', Arial, sans-serif;
+  overflow-x: hidden;
 }
 
+/* --- Responsive Utilities --- */
+.nav-container {
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.food-container {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.food-cart-sidebar {
+  width: 380px;
+  position: sticky;
+  top: 88px;
+}
+
+@media (max-width: 768px) {
+
+  /* Navbar tweaks */
+  .nav-container {
+    padding: 12px 16px !important;
+    height: auto !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .nav-right {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  /* FoodList tweaks */
+  .food-container {
+    flex-direction: column-reverse !important;
+    gap: 24px !important;
+  }
+
+  .food-cart-sidebar {
+    width: 100% !important;
+    position: static !important;
+  }
+
+  /* Text and Margins tweaks */
+  .mobile-text-sm {
+    font-size: 11px !important;
+  }
+
+  .mobile-text-base {
+    font-size: 14px !important;
+  }
+}

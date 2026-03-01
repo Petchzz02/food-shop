@@ -59,7 +59,7 @@ export async function adminLogin(formData: FormData) {
   const username = formData.get('username') as string
   const password = formData.get('password') as string
 
-  if (username !== 'admin01' || password !== 'admin') {
+  if (username !== process.env.ADMIN_USERNAME || password !== process.env.ADMIN_PASSWORD) {
     return { error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' }
   }
 
