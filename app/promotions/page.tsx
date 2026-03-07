@@ -1,13 +1,11 @@
 // app/promotions/page.tsx
 import pool from '@/lib/db'
-import Navbar from '@/components/Navbar'
 
 export default async function PromotionsPage() {
     const [promotions] = await pool.execute('SELECT * FROM Promotion WHERE isActive = 1 ORDER BY id DESC') as any[]
 
     return (
         <>
-            <Navbar />
             <div style={{ minHeight: 'calc(100vh - 64px)', background: '#fff7ed', padding: '40px 20px' }}>
                 <div style={{ maxWidth: '800px', margin: '0 auto' }}>
 

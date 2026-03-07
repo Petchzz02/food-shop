@@ -62,6 +62,17 @@ export default async function Navbar() {
               <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '13px' }}>ชำระเงิน</span>
             </Link>
 
+            {/* Order Status link */}
+            <Link href="/profile?tab=orders" style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              background: '#eff6ff', borderRadius: '10px', padding: '6px 14px',
+              textDecoration: 'none',
+              boxShadow: '0 2px 8px rgba(29,78,216,0.15)',
+            }}>
+              <span style={{ fontSize: '14px' }}>📦</span>
+              <span style={{ color: '#1d4ed8', fontWeight: 700, fontSize: '13px' }}>สถานะออเดอร์</span>
+            </Link>
+
             {/* User name */}
             <Link href="/profile" style={{
               display: 'flex', alignItems: 'center', gap: '6px',

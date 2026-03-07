@@ -4,8 +4,10 @@
 import pool from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { getSession } from '@/lib/auth'
 import { notifyDiscord } from '@/lib/discord'
+import { sendOrderEmail } from '@/lib/email'
 
 export async function addProduct(formData: FormData) {
   const name = formData.get('name') as string
@@ -60,9 +62,14 @@ export async function submitOrder(
   }
 
   // เช็ค session เพื่อเชื่อม order กับ user
+  const cookieStore = await cookies()
+  const adminSession = cookieStore.get('admin_session')?.value
+  
   const session = await getSession()
   const userId = session?.id ?? null
-  const isAdmin = session?.role === 'ADMIN'
+  
+  // ให้ความสำคัญกับ admin_session ก่อน
+  const isAdmin = adminSession === 'authenticated' || session?.role === 'ADMIN' || session?.role === 'admin'
 
   // ✅ แลกแต้มส่วนลด (1 แต้ม = 1 บาท) — เฉพาะ user ที่ login (ที่ไม่ใช่ admin สั่ง)
   let pointsDiscount = 0
@@ -75,22 +82,29 @@ export async function submitOrder(
   }
 
   // ✅ หา targetUserId สำหรับสะสมแต้ม
-  // - ถ้า admin สั่ง: ดูจากเบอร์โทรเท่านั้น ถ้าไม่กรอก = ไม่เชื่อม (null)
+  // - ถ้า admin สั่ง: ถ้ากรอกเบอร์ จะไปหาในฐานข้อมูล ถ้าเจอ = ผูก, ถ้าไม่เจอ = ลูกค้าใหม่, ถ้าไม่กรอก = ไม่ต้องหา
   // - ถ้า login ปกติ: ใช้ userId ตัวเอง
   let targetUserId: number | null = null
   let displayName = 'ลูกค้าทั่วไป'
 
   if (isAdmin) {
-    if (customerPhone.trim()) {
+    const phone = customerPhone.trim()
+    if (phone) {
       const [phoneRows] = await pool.execute(
         'SELECT id, name FROM User WHERE phone = ?',
-        [customerPhone.trim()]
+        [phone]
       ) as any[]
       const phoneUser = (phoneRows as any[])[0]
       if (phoneUser) {
         targetUserId = phoneUser.id
         displayName = phoneUser.name ?? 'ลูกค้า'
+      } else {
+        // กรอกเบอร์แต่ไม่เจอในฐานข้อมูล -> ถือเป็นลูกค้าใหม่
+        displayName = `ลูกค้าใหม่ (${phone})`
       }
+    } else {
+      // ไม่ได้กรอกเบอร์ -> ถือเป็นลูกค้าหน้าร้านทั่วไป
+      displayName = 'ลูกค้าทั่วไป'
     }
   } else if (userId) {
     targetUserId = userId
@@ -146,6 +160,15 @@ export async function submitOrder(
     total,
     orderItemsData.map((x) => ({ productName: x.productName, quantity: x.quantity, price: x.price })),
     displayName
+  )
+
+  // ✅ แจ้งเตือน Email
+  await sendOrderEmail(
+    orderId,
+    total,
+    orderItemsData.map((x) => ({ productName: x.productName, quantity: x.quantity, price: x.price })),
+    displayName,
+    session?.email // ถ้า login อยู่ จะส่งอีเมลหาลูกค้าด้วย
   )
 
   revalidatePath('/')

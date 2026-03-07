@@ -2,6 +2,7 @@
 import pool from '@/lib/db'
 import { updateOrderStatus } from './actions'
 import { SubmitButton } from '@/components/SubmitButton'
+import { ConfirmForm } from './ConfirmForm'
 
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string }> = {
     PENDING: { label: '⏳ รอดำเนินการ', color: '#b45309', bg: '#fefce8' },
@@ -139,14 +140,9 @@ export default async function AdminOrdersPage() {
                                                 </div>
                                             )}
                                             {order.slipUrl && (
-                                                <div style={{ marginTop: '6px' }}>
-                                                    <a href={order.slipUrl} target="_blank" rel="noreferrer" style={{
-                                                        fontSize: '12px', color: '#1d4ed8', fontWeight: 700,
-                                                        textDecoration: 'none',
-                                                        background: '#eff6ff', borderRadius: '6px',
-                                                        padding: '3px 10px',
-                                                    }}>
-                                                        🧾 ดูสลิปโอนเงิน
+                                                <div style={{ marginTop: '12px' }}>
+                                                    <a href={order.slipUrl} target="_blank" rel="noreferrer">
+                                                        <img src={order.slipUrl} alt="Slip" style={{ maxWidth: '200px', maxHeight: '300px', borderRadius: '8px', border: '1px solid #e5e7eb', objectFit: 'contain' }} />
                                                     </a>
                                                 </div>
                                             )}
@@ -160,16 +156,24 @@ export default async function AdminOrdersPage() {
                                             </div>
                                             {/* Update Status Form */}
                                             {canAdvance && (
-                                                <form action={updateOrderStatus} style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+                                                <ConfirmForm
+                                                    action={updateOrderStatus}
+                                                    style={{ marginTop: '8px', display: 'flex', gap: '8px' }}
+                                                    confirmMessage={nextSt === 'PAID' ? 'คุณแน่ใจหรือไม่ว่าได้รับยอดชำระเงินแล้ว?' : 'คุณแน่ใจหรือไม่ว่าได้จัดส่งสินค้านี้แล้ว?'}
+                                                >
                                                     <input type="hidden" name="orderId" value={order.id} />
                                                     <input type="hidden" name="status" value={nextSt} />
                                                     <SubmitButton
                                                         label={nextSt === 'PAID' ? '✅ ทำเครื่องหมาย: ชำระแล้ว' : '🚚 ทำเครื่องหมาย: จัดส่งแล้ว'}
                                                     />
-                                                </form>
+                                                </ConfirmForm>
                                             )}
                                             {order.status === 'PENDING' && (
-                                                <form action={updateOrderStatus} style={{ marginTop: '6px' }}>
+                                                <ConfirmForm
+                                                    action={updateOrderStatus}
+                                                    style={{ marginTop: '6px' }}
+                                                    confirmMessage="คุณแน่ใจหรือไม่ว่าจะยกเลิกออเดอร์นี้?"
+                                                >
                                                     <input type="hidden" name="orderId" value={order.id} />
                                                     <input type="hidden" name="status" value="CANCELLED" />
                                                     <button type="submit" style={{
@@ -179,7 +183,7 @@ export default async function AdminOrdersPage() {
                                                     }}>
                                                         ❌ ยกเลิกออเดอร์
                                                     </button>
-                                                </form>
+                                                </ConfirmForm>
                                             )}
                                         </div>
                                     </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import {
   updateProfile, changePassword,
   addAddress, updateAddress, deleteAddress, setDefaultAddress,
@@ -507,6 +507,14 @@ function TabPayment() {
 // ─── Main Component ─────────────────────────────────────────
 export default function ProfileTabs({ user, addresses, orders, favorites, notifSetting }: Props) {
   const [activeTab, setActiveTab] = useState('info')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const tab = params.get('tab')
+    if (tab && TABS.some(t => t.id === tab)) {
+      setActiveTab(tab)
+    }
+  }, [])
 
   return (
     <div>
