@@ -42,7 +42,8 @@ export async function submitOrder(
   cartItems: { id: number; count: number }[],
   usePoints: number = 0,
   customerPhone: string = '',
-  guestInfo?: { name: string; phone: string; address: string }
+  guestInfo?: { name: string; phone: string; address: string },
+  isAdminRequest?: boolean
 ) {
   let total = 0
   const orderItemsData: { productId: number; productName: string; quantity: number; price: number }[] = []
@@ -69,7 +70,9 @@ export async function submitOrder(
   const userId = session?.id ?? null
   
   // ให้ความสำคัญกับ admin_session ก่อน
-  const isAdmin = adminSession === 'authenticated' || session?.role === 'ADMIN' || session?.role === 'admin'
+  // แก้ไข: ถ้ามีการเรียกใช้งานหน้า admin ให้ยึดจากคุกกี้อย่างเดียว 
+  // การล็อกอินด้วยบัญชีแอดมินในหน้าร้าน (role: admin) ถือเป็นการสั่งซื้อแบบ member ปกติ
+  const isAdmin = isAdminRequest && adminSession === 'authenticated'
 
   // ✅ แลกแต้มส่วนลด (1 แต้ม = 1 บาท) — เฉพาะ user ที่ login (ที่ไม่ใช่ admin สั่ง)
   let pointsDiscount = 0

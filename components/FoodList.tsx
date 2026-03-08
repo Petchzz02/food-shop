@@ -82,7 +82,8 @@ export function FoodList({
       cart.map((i) => ({ id: i.id, count: i.count })),
       usePoints,
       isAdmin ? customerPhone : '',
-      (!userId && !isAdmin) ? { name: guestName, phone: guestPhone, address: guestAddress } : undefined
+      (!userId && !isAdmin) ? { name: guestName, phone: guestPhone, address: guestAddress } : undefined,
+      isAdmin // ✅ ส่ง flag ไปที่ server ว่านี่คือออเดอร์ของ Admin
     )
     if (!result?.success) {
       setErrorMsg(result?.error ?? 'เกิดข้อผิดพลาด')
